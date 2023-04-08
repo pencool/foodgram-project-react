@@ -1,11 +1,5 @@
 from django.db import models
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-
-USER_ROLE_CHOICE = (
-    (settings.ADMIN, 'Администратор'),
-    (settings.USER, 'Пользователь'),
-)
 
 
 class MyUserManager(BaseUserManager):
@@ -29,11 +23,13 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username, email, password, **kwargs):
+    def create_superuser(self, username, email, password, first_name='admin',
+                         last_name='admin', **kwargs):
         user = self.create_user(username=username,
                                 email=email,
-                                password=password, **kwargs)
-        user.role = settings.ADMIN
+                                password=password,
+                                first_name=first_name,
+                                last_name=last_name, **kwargs)
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -42,15 +38,13 @@ class MyUserManager(BaseUserManager):
 
 class User(AbstractUser):
     """Костомная модель пользователя."""
-    role = models.CharField(max_length=50, choices=USER_ROLE_CHOICE,
-                            default='user')
+    email = models.EmailField(max_length=254, unique=True)
+    username = models.CharField(max_length=150, unique=True)
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    password = models.CharField(max_length=150)
 
     objects = MyUserManager()
 
-    @property
-    def is_admin(self):
-        return self.role == settings.ADMIN or self.is_superuser
-
-    @property
-    def is_user(self):
-        return self.role == settings.USER
+    def __str__(self):
+        return self.username
