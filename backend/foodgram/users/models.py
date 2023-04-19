@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from rest_framework import serializers
 
 
 class MyUserManager(BaseUserManager):
@@ -15,8 +16,13 @@ class MyUserManager(BaseUserManager):
             raise ValueError('Имя должно быть заполнено.')
         if not last_name:
             raise ValueError('Фамилия должна быть заполнена.')
+        if username.lower() == 'me':
+            raise serializers.ValidationError(
+                "me нельзя использовать в качестве имени пользователя")
         user = self.model(username=username.lower(),
                           email=self.normalize_email(email),
+                          first_name=first_name,
+                          last_name=last_name,
                           **kwargs
                           )
         user.set_password(password)
@@ -42,9 +48,11 @@ class User(AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
-    password = models.CharField(max_length=150)
 
     objects = MyUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     def __str__(self):
         return self.username
