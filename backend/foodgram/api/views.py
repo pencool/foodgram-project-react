@@ -7,7 +7,8 @@ from reviews.models import Tag, Ingredient, Recipe, Favorite, Follow, Cart
 from users.models import User
 from api.serializers import (UserSerializer, TagSerializer,
                              IngredientSerializer, RecipeSerializer,
-                             FavoriteSerializer, AddFavoriteCartShowSerializer)
+                             FavoriteSerializer, AddFavoriteCartShowSerializer,
+                             FollowSerializer)
 
 
 def add(model, cur_user, pk, word, serializer=None):
@@ -32,7 +33,7 @@ def delete(model, cur_user, pk, word):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    http_method_names = ['get', 'post']
+    http_method_names = ['get', 'post', 'delete']
     lookup_field = 'id'
     search_fields = ('username',)
 
@@ -44,6 +45,31 @@ class UserViewSet(viewsets.ModelViewSet):
         cur_user = get_object_or_404(User, username=request.user.username)
         serializer = self.get_serializer(cur_user, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['post', 'delete'], detail=True,
+            queryset=Follow.objects.all(),
+            url_path='subscribe',
+            serializer_class=FollowSerializer,
+            permission_classes=(IsAuthenticated,))
+    def subscribe(self, request, id):
+        cur_user = get_object_or_404(User, id=request.user.id)
+        author = get_object_or_404(User, id=id)
+        value = Follow.objects.filter(user=cur_user.id, author=id)
+        if request.method == 'POST':
+            if value.exists():
+                return Response(
+                    {'error': f'Вы уже подписаны на этого автора.'})
+            if cur_user == author:
+                return Response({'error': f'Нельзя подписаться на себя.'})
+            follow = Follow.objects.create(user=cur_user, author=author)
+            serializer = self.serializer_class(follow,
+                                               context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            if value.exists():
+                value.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'error': f'Вы не подписаны на этого автора.'})
 
 
 class TagViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
