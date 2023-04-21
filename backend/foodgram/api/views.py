@@ -134,3 +134,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
                        self.serializer_class)
         if request.method == 'DELETE':
             return delete(Cart, cur_user, pk, 'списке покупок')
+
+    @action(methods=['get'], detail=False,
+            queryset=Cart.objects.all(),
+            url_path='download_shopping_cart',
+            serializer_class=AddFavoriteCartShowSerializer,
+            permission_classes=(IsAuthenticated,))
+    def download_shopping_cart(self, request):
+        cur_user = get_object_or_404(User, id=request.user.id)
+        recipes = Cart.objects.filter
+
