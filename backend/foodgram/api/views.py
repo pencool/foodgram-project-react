@@ -1,10 +1,12 @@
 from rest_framework import mixins, viewsets, status, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from reviews.models import Tag, Ingredient, Recipe, Favorite, Follow, Cart
 from users.models import User
+from api.filters import RecipeFilter
 from api.serializers import (UserSerializer, TagSerializer,
                              IngredientSerializer, RecipeSerializer,
                              FavoriteSerializer, AddFavoriteCartShowSerializer,
@@ -101,6 +103,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

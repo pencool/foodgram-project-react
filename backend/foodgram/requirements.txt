@@ -4,3 +4,4 @@ psycopg2-binary==2.9.5
 python-dotenv==0.20.0
 djangorestframework-simplejwt==4.7.2
 Pillow==9.5.0
+django-filter==23.1
