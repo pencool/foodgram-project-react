@@ -1,7 +1,6 @@
-from rest_framework import mixins, viewsets, status
+from rest_framework import mixins, viewsets, status, filters
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from reviews.models import Tag, Ingredient, Recipe, Favorite, Follow, Cart
@@ -35,8 +34,6 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     http_method_names = ['get', 'post', 'delete']
-    lookup_field = 'id'
-    search_fields = ('username',)
 
     @action(methods=['get'], detail=False,
             queryset=User.objects.all(),
@@ -76,10 +73,14 @@ class UserViewSet(viewsets.ModelViewSet):
             queryset=Follow.objects.all(),
             url_path='subscriptions',
             serializer_class=FollowSerializer,
-            pagination_class=PageNumberPagination,
             permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):
-
+        user = request.user
+        value = Follow.objects.filter(user=user)
+        results = self.paginate_queryset(value)
+        serializer = self.serializer_class(
+            results, context={'request': request}, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 class TagViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
@@ -92,6 +93,8 @@ class IngredientViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('^name', )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

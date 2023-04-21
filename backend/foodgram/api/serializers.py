@@ -188,7 +188,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def recipes_limit(self, obj):
         request = self.context.get('request')
-        limit = request.data.get('recipes_limit', None)
+        limit = request.GET.get('recipes_limit')
         recipes = Recipe.objects.filter(author=obj.author)
         if limit:
             recipes = recipes[:int(limit)]
@@ -196,14 +196,6 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def recipes_counter(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
-
-
-class FollowSubscriptionsSerializer(FollowSerializer):
-    page = serializers.IntegerField()
-    limit = serializers.IntegerField()
-
-    class Meta(FollowSerializer.Meta):
-        fields = FollowSerializer.Meta.fields + ('page', 'limit')
 
 
 class CartSerializer(serializers.ModelSerializer):
