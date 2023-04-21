@@ -1,5 +1,6 @@
 from rest_framework import mixins, viewsets, status
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
@@ -70,6 +71,15 @@ class UserViewSet(viewsets.ModelViewSet):
                 value.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             return Response({'error': f'Вы не подписаны на этого автора.'})
+
+    @action(methods=['get'], detail=False,
+            queryset=Follow.objects.all(),
+            url_path='subscriptions',
+            serializer_class=FollowSerializer,
+            pagination_class=PageNumberPagination,
+            permission_classes=(IsAuthenticated,))
+    def subscriptions(self, request):
+
 
 
 class TagViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
