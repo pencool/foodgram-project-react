@@ -1,10 +1,15 @@
+from django.http import HttpResponse
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 from rest_framework import mixins, viewsets, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
-from reviews.models import Tag, Ingredient, Recipe, Favorite, Follow, Cart
+from reviews.models import (Tag, Ingredient, Recipe, Favorite, Follow, Cart,
+                            IngredientsAmount)
 from users.models import User
 from api.filters import RecipeFilter
 from api.serializers import (UserSerializer, TagSerializer,
@@ -136,11 +141,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return delete(Cart, cur_user, pk, 'списке покупок')
 
     @action(methods=['get'], detail=False,
-            queryset=Cart.objects.all(),
             url_path='download_shopping_cart',
-            serializer_class=AddFavoriteCartShowSerializer,
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
         cur_user = get_object_or_404(User, id=request.user.id)
-        recipes = Cart.objects.filter
+        recipes = Cart.objects.filter(user=cur_user).values_list('recipe')
+        ingredients = IngredientsAmount.objects.filter(
+            recipe__id__in=recipes).values_list(
+            'ingredient__name', 'ingredient__measurement_unit', 'amount')
+        ingredients_for_shop = {}
+        for ingredient in ingredients:
+            ingr, mesur, amount = ingredient
+            ingredients_for_shop.setdefault(ingr, [0, mesur])[0] += amount
+        pdfmetrics.registerFont(TTFont('DejaVuSerif', 'DejaVuSerif.ttf'))
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="file.pdf"'
+        p = canvas.Canvas(response)
+        p.setFont('DejaVuSerif', 20)
+        p.drawString(20, 800, f'{cur_user.get_full_name().title()}'
+                              f' вот ваш список покупок!')
+        p.setFont('DejaVuSerif', 18,)
+        top = 776
+        paragraph = 1
+        for ingredient, params in ingredients_for_shop.items():
+            p.drawString(20, top, f'{paragraph}) {ingredient.capitalize()}'
+                                  f'({params[1]}) - {params[0]}')
+            top -= 18
+            paragraph += 1
+        p.showPage()
+        p.save()
+        return response
 
