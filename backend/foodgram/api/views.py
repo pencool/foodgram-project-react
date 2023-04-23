@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from users.models import User
 from api.filters import RecipeFilter
-from permissions import (IsAdminPermission, IsAdminOrReadOnly,
+from api.permissions import (IsAdminPermission, IsAdminOrReadOnly,
                          IsOwnerOrReadOnlyPermission)
 from reviews.models import (Tag, Ingredient, Recipe, Favorite,
                                              Follow, Cart,
