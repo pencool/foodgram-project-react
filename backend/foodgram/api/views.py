@@ -8,14 +8,19 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
-from reviews.models import (Tag, Ingredient, Recipe, Favorite, Follow, Cart,
-                            IngredientsAmount)
 from users.models import User
 from api.filters import RecipeFilter
+from permissions import (IsAdminPermission, IsAdminOrReadOnly,
+                         IsOwnerOrReadOnlyPermission)
+from reviews.models import (Tag, Ingredient, Recipe, Favorite,
+                                             Follow, Cart,
+                                             IngredientsAmount)
 from api.serializers import (UserSerializer, TagSerializer,
-                             IngredientSerializer, RecipeSerializer,
-                             FavoriteSerializer, AddFavoriteCartShowSerializer,
-                             FollowSerializer)
+                                              IngredientSerializer,
+                                              RecipeSerializer,
+                                              FavoriteSerializer,
+                                              AddFavoriteCartShowSerializer,
+                                              FollowSerializer)
 
 
 def add(model, cur_user, pk, word, serializer=None):
@@ -94,14 +99,16 @@ class TagViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
                  viewsets.GenericViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (IsAdminPermission,)
 
 
 class IngredientViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('^name', )
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('^name',)
+    permission_classes = (IsAdminOrReadOnly, )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -110,6 +117,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    permission_classes = (IsOwnerOrReadOnlyPermission, )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -160,7 +168,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         p.setFont('DejaVuSerif', 20)
         p.drawString(20, 800, f'{cur_user.get_full_name().title()}'
                               f' вот ваш список покупок!')
-        p.setFont('DejaVuSerif', 18,)
+        p.setFont('DejaVuSerif', 18, )
         top = 776
         paragraph = 1
         for ingredient, params in ingredients_for_shop.items():
@@ -171,4 +179,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
         p.showPage()
         p.save()
         return response
-

@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -49,6 +48,7 @@ INSTALLED_APPS = [
     'users',
     'reviews',
     'api',
+    'corecommands',
 ]
 
 MIDDLEWARE = [
