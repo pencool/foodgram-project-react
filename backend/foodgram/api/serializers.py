@@ -4,8 +4,8 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from users.models import User
 from reviews.models import (Tag, Ingredient, Recipe, Favorite,
-                                             Follow, Cart,
-                                             IngredientsAmount)
+                            Follow, Cart,
+                            IngredientsAmount)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -138,12 +138,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         instance.tags.set(self.initial_data.get('tags'))
         IngredientsAmount.objects.filter(recipe=instance).all().delete()
-        for ing in validated_data.get('ingredients'):
-            IngredientsAmount.objects.create(
-                recipe=instance,
-                ingredient_id=ing['id'],
-                amount=ing['amount']
-            )
+        objects = [IngredientsAmount(recipe=instance,
+                                     ingredient_id=ing['id'],
+                                     amount=ing['amount']
+                                     ) for ing in
+                   validated_data.get('ingredients')]
+        IngredientsAmount.objects.bulk_create(objects)
         instance.save()
         return instance
 
@@ -184,19 +184,39 @@ class FollowSerializer(serializers.ModelSerializer):
                   'is_subscribed', 'recipes', 'recipes_count')
 
     def user_is_subscribed(self, obj):
-        return Follow.objects.filter(
-            user=obj.user, author=obj.author).exists()
+        return obj.following.filter(
+            user=self.context.get('request').user).exists()
 
     def recipes_limit(self, obj):
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
-        recipes = Recipe.objects.filter(author=obj.author)
+        recipes = Recipe.objects.filter(author=obj)
         if limit:
             recipes = recipes[:int(limit)]
         return AddFavoriteCartShowSerializer(recipes, many=True).data
 
     def recipes_counter(self, obj):
-        return Recipe.objects.filter(author=obj.author).count()
+        return Recipe.objects.filter(author=obj).count()
+
+    def validate(self, attrs):
+        author = User.objects.get(id=self.context.get(
+            'request').parser_context.get('kwargs').get('pk'))
+        cur_user = self.context.get('request').user
+        value = Follow.objects.filter(user=cur_user, author=author)
+        if author == cur_user:
+            raise serializers.ValidationError(
+                {'error': 'Нельзя подписаться на себя.'})
+        if value.exists():
+            raise serializers.ValidationError(
+                {'error': 'Вы уже подписаны на этого автора.'})
+        return attrs
+
+    def create(self, validated_data):
+        author = User.objects.get(id=self.context.get(
+            'request').parser_context.get('kwargs').get('pk'))
+        cur_user = self.context.get('request').user
+        follow = Follow.objects.create(author=author, user=cur_user)
+        return follow
 
 
 class CartSerializer(serializers.ModelSerializer):

@@ -61,19 +61,15 @@ class UserViewSet(viewsets.ModelViewSet):
             url_path='subscribe',
             serializer_class=FollowSerializer,
             permission_classes=(IsAuthenticated,))
-    def subscribe(self, request, id):
+    def subscribe(self, request, pk):
         cur_user = get_object_or_404(User, id=request.user.id)
-        author = get_object_or_404(User, id=id)
-        value = Follow.objects.filter(user=cur_user.id, author=id)
+        author = get_object_or_404(User, id=pk)
+        value = Follow.objects.filter(user=cur_user.id, author=pk)
         if request.method == 'POST':
-            if value.exists():
-                return Response(
-                    {'error': f'Вы уже подписаны на этого автора.'})
-            if cur_user == author:
-                return Response({'error': f'Нельзя подписаться на себя.'})
-            follow = Follow.objects.create(user=cur_user, author=author)
-            serializer = self.serializer_class(follow,
+            serializer = self.serializer_class(author, data=request.data,
                                                context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             if value.exists():
