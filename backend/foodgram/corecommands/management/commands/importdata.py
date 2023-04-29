@@ -1,7 +1,9 @@
 import csv
-from django.conf import settings
 from pathlib import Path
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
+
 from reviews.models import Ingredient
 
 path = Path(settings.BASE_DIR).resolve().parent.parent.joinpath(
@@ -17,5 +19,3 @@ class Command(BaseCommand):
                 Ingredient.objects.create(name=name, measurement_unit=mes)
                 self.stdout.write(f'{name}=={self.style.SUCCESS("OK.")}')
             self.stdout.write(f'{self.style.SUCCESS("Импорт выполнен.")}')
-
-

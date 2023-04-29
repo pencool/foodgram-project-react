@@ -35,6 +35,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
+            cd foodgram
             sudo docker-compose down -v
             sudo docker image rm pencool/foodgram_back:v1
             sudo docker image rm pencool/foodgram_front:v1
@@ -47,8 +48,8 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             sudo docker-compose up -d
-            sudo docker-compose exec -T web python manage.py migrate
-            sudo docker-compose exec -T web python manage.py collectstatic --no-input
+            sudo docker-compose exec -T backend python manage.py migrate
+            sudo docker-compose exec -T backend python manage.py collectstatic --no-input
 
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub

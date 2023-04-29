@@ -1,26 +1,23 @@
 from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import mixins, viewsets, status, filters
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.generics import get_object_or_404
-from users.models import User
+
 from api.filters import RecipeFilter
-from api.permissions import (IsAdminPermission, IsAdminOrReadOnly,
-                         IsOwnerOrReadOnlyPermission)
-from reviews.models import (Tag, Ingredient, Recipe, Favorite,
-                                             Follow, Cart,
-                                             IngredientsAmount)
-from api.serializers import (UserSerializer, TagSerializer,
-                                              IngredientSerializer,
-                                              RecipeSerializer,
-                                              FavoriteSerializer,
-                                              AddFavoriteCartShowSerializer,
-                                              FollowSerializer)
+from api.permissions import (IsAdminOrReadOnly, IsAdminPermission,
+                             IsOwnerOrReadOnlyPermission)
+from api.serializers import (AddFavoriteCartShowSerializer, FollowSerializer,
+                             IngredientSerializer,
+                             RecipeSerializer, TagSerializer, UserSerializer)
+from reviews.models import (Cart, Favorite, Follow, Ingredient,
+                            IngredientsAmount, Recipe, Tag)
+from users.models import User
 
 
 def add(model, cur_user, pk, word, serializer=None):
@@ -75,7 +72,7 @@ class UserViewSet(viewsets.ModelViewSet):
             if value.exists():
                 value.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            return Response({'error': f'Вы не подписаны на этого автора.'})
+            return Response({'error': 'Вы не подписаны на этого автора.'})
 
     @action(methods=['get'], detail=False,
             queryset=Follow.objects.all(),
