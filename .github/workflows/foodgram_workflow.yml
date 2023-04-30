@@ -71,6 +71,12 @@ jobs:
           context: ./backend/foodgram
           push: true
           tags: pencool/foodgram_back:v1
+      - name: Push to Docker Hub front
+        uses: docker/build-push-action@v2
+        with:
+          context: ./frontend
+          push: true
+          tags: pencool/foodgram_front:v1
 
   send_message:
     runs-on: ubuntu-latest
