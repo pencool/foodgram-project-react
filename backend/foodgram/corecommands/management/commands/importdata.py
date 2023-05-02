@@ -5,9 +5,9 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from reviews.models import Ingredient
+from users.models import User
 
-path = Path(settings.BASE_DIR).resolve().parent.parent.joinpath(
-    'data/ingredients.csv')
+path = Path(settings.BASE_DIR, 'data', 'ingredients.csv')
 
 
 class Command(BaseCommand):
@@ -19,3 +19,12 @@ class Command(BaseCommand):
                 Ingredient.objects.create(name=name, measurement_unit=mes)
                 self.stdout.write(f'{name}=={self.style.SUCCESS("OK.")}')
             self.stdout.write(f'{self.style.SUCCESS("Импорт выполнен.")}')
+        User.objects.create(
+            username='f_admin',
+            email='f_admin@admin.ru',
+            password='f_admin',
+            first_name='admin',
+            last_name='admin',
+            is_superuser=True,
+
+        )

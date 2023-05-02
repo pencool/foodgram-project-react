@@ -11,8 +11,8 @@ services:
     image: pencool/foodgram_back:v1
     restart: always
     volumes:
-      - static_value:/backend/static
-      - media_value:/backend/media
+      - static_value:/backend/static/
+      - media_value:/backend/media/
     depends_on:
       - db
     env_file:
