@@ -21,7 +21,7 @@ services:
   frontend:
     image: pencool/foodgram_front:v1
     volumes:
-      - ../frontend/:/app/result_build/
+      - ../frontend/:/backend/result_build/
     depends_on:
       - db
 
