@@ -6,7 +6,7 @@ from reportlab.pdfgen import canvas
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from api.filters import RecipeFilter
@@ -92,7 +92,7 @@ class TagViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
                  viewsets.GenericViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = (IsAdminPermission,)
+    permission_classes = (AllowAny,)
 
 
 class IngredientViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
