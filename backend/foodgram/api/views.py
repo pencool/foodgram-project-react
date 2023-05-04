@@ -3,15 +3,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from api.filters import RecipeFilter
-from api.permissions import (IsAdminOrReadOnly, IsAdminPermission,
-                             IsOwnerOrReadOnlyPermission)
+from api.filters import RecipeFilter, IngredientsFilter
+from api.permissions import (IsOwnerOrReadOnlyPermission, )
 from api.serializers import (AddFavoriteCartShowSerializer, FollowSerializer,
                              IngredientSerializer,
                              RecipeSerializer, TagSerializer, UserSerializer)
@@ -93,15 +92,16 @@ class TagViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (AllowAny,)
+    pagination_class = None
 
 
 class IngredientViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
-    permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (AllowAny, )
+    pagination_class = None
+    filterset_class = IngredientsFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
