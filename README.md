@@ -12,6 +12,8 @@ https://github.com/pencool/foodgram-project-react/actions/workflows/foodgram_wor
 |http://pencoolfoodgram.ddns.net/api/docs/  | Документация |
 |http://pencoolfoodgram.ddns.net/admin/|Админ зона|
 
+Админка: admin@admin.ru | admin
+
 
 
 
