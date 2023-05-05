@@ -226,7 +226,7 @@ class SubscribeSerializer(FollowSerializer):
 
     def user_is_subscribed(self, obj):
         user = self.context.get('request').user
-        return Follow.objects.filter(user=user, author=obj).exists()
+        return Follow.objects.filter(user=user.id, author=obj.id).exists()
 
 
 class CartSerializer(serializers.ModelSerializer):
