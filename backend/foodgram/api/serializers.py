@@ -220,13 +220,33 @@ class FollowSerializer(serializers.ModelSerializer):
         return follow
 
 
-class SubscribeSerializer(FollowSerializer):
+class SubscribeSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(
         method_name='user_is_subscribed')
+    recipes = serializers.SerializerMethodField(
+        method_name='recipes_limit')
+    recipes_count = serializers.SerializerMethodField(
+        method_name='recipes_counter')
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes', 'recipes_count')
 
     def user_is_subscribed(self, obj):
         user = self.context.get('request').user
-        return Follow.objects.filter(user=user.id, author=obj.id).exists()
+        return Follow.objects.filter(user=user, author=obj).exists()
+
+    def recipes_limit(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        recipes = Recipe.objects.filter(author=obj)
+        if limit:
+            recipes = recipes[:int(limit)]
+        return AddFavoriteCartShowSerializer(recipes, many=True).data
+
+    def recipes_counter(self, obj):
+        return Recipe.objects.filter(author=obj).count()
 
 
 class CartSerializer(serializers.ModelSerializer):
