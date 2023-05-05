@@ -48,8 +48,10 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             sudo docker-compose up -d
-            sudo docker-compose exec -T backend python manage.py migrate
-            sudo docker-compose exec -T backend python manage.py collectstatic --no-input
+            sudo docker exec foodgram_backend_1 python manage.py makemigrations
+            sudo docker exec foodgram_backend_1 python manage.py migrate
+            sudo docker exec foodgram_backend_1 python manage.py collectstatic --no-input
+            sudo docker exec foodgram_backend_1 python manage.py importdata
 
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
