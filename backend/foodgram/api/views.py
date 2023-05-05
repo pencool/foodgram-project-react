@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -154,6 +154,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         for ingredient in ingredients:
             ingr, mesur, amount = ingredient
             ingredients_for_shop.setdefault(ingr, [0, mesur])[0] += amount
+        print(ingredients_for_shop)
         pdfmetrics.registerFont(TTFont('DejaVuSerif', 'DejaVuSerif.ttf'))
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="file.pdf"'

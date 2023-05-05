@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 print(BASE_DIR)
 env_path = Path(BASE_DIR.parent.parent, 'infra', '.env')
-load_dotenv(env_path)
+load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -27,7 +27,7 @@ load_dotenv(env_path)
 SECRET_KEY = 'django-insecure-35uhx4v!hyktbryuk$sh85^$1=0so4sk^j$-m345#l!03h(-rs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
