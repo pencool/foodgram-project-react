@@ -196,6 +196,15 @@ class FollowSerializer(serializers.ModelSerializer):
             recipes = recipes[:int(limit)]
         return AddFavoriteCartShowSerializer(recipes, many=True).data
 
+
+class SubscribeSerializer(FollowSerializer):
+    is_subscribed = serializers.SerializerMethodField(
+        method_name='user_is_subscribed')
+
+    def user_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        return Follow.objects.filter(user=user, author=obj).exists()
+
     def recipes_counter(self, obj):
         return Recipe.objects.filter(author=obj).count()
 

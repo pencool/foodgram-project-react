@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from api.filters import RecipeFilter, IngredientsFilter
 from api.permissions import (IsOwnerOrReadOnlyPermission, )
 from api.serializers import (AddFavoriteCartShowSerializer, FollowSerializer,
-                             IngredientSerializer,
+                             IngredientSerializer,SubscribeSerializer,
                              RecipeSerializer, TagSerializer, UserSerializer)
 from reviews.models import (Cart, Favorite, Follow, Ingredient,
                             IngredientsAmount, Recipe, Tag)
@@ -76,11 +76,11 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(methods=['get'], detail=False,
             queryset=Follow.objects.all(),
             url_path='subscriptions',
-            serializer_class=FollowSerializer,
+            serializer_class=SubscribeSerializer,
             permission_classes=(IsAuthenticated,))
     def subscriptions(self, request):
         user = request.user
-        value = Follow.objects.filter(user=user)
+        value = User.objects.filter(following__user=user)
         results = self.paginate_queryset(value)
         serializer = self.serializer_class(
             results, context={'request': request}, many=True)
