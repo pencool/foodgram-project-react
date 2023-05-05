@@ -1,14 +1,15 @@
 from django_filters import rest_framework as filters
 
-from reviews.models import Recipe, Ingredient
+from reviews.models import Recipe, Ingredient, Tag
 
 
 class RecipeFilter(filters.FilterSet):
     is_favorited = filters.BooleanFilter(method='favorited_filter')
     is_in_shopping_cart = filters.BooleanFilter(method='in_cart_filter')
     author = filters.CharFilter(field_name='author__id', lookup_expr='exact')
-    tags = filters.AllValuesMultipleFilter(field_name='tags__slug',
-                                           lookup_expr='exact')
+    tags = filters.ModelMultipleChoiceFilter(field_name='tags__slug',
+                                             to_field_name='slug',
+                                           queryset=Tag.objects.all())
 
     def favorited_filter(self, queryset, name, value):
         user = self.request.user
