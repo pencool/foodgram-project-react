@@ -155,7 +155,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ingr, mesur, amount = ingredient
             ingredients_for_shop.setdefault(ingr, [0, mesur])[0] += amount
         print(ingredients_for_shop)
-        pdfmetrics.registerFont(TTFont('DejaVuSerif', 'api/DejaVuSerif.ttf', 'UTF-8'))
+        pdfmetrics.registerFont(TTFont('DejaVuSerif',
+                                       'api/DejaVuSerif.ttf', 'UTF-8'))
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="file.pdf"'
         p = canvas.Canvas(response)
