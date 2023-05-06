@@ -69,12 +69,6 @@ class IngredientsAmountSerializer(serializers.ModelSerializer):
         model = IngredientsAmount
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
-    def validate(self, attrs):
-        if int(attrs['amount']) <= 0:
-            raise serializers.ValidationError(
-                'Количество ингредиента должно быть больше 0!')
-        return attrs
-
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(read_only=True, many=True)
@@ -116,10 +110,13 @@ class RecipeSerializer(serializers.ModelSerializer):
                 'Нельзя добавлять рецепты без ингредиентов.')
         attrs['ingredients'] = []
         for ing in ingredients:
-            ingredient = get_object_or_404(Ingredient, id=ing['id'])
-            if ingredient in attrs['ingredients']:
+            if ing['amount'] <= 0:
                 raise serializers.ValidationError(
-                    'Вы уже добавляли этот ингредиент.')
+                    'Количество ингредиента должно быть больше 0!')
+            for key_ing in attrs['ingredients']:
+                if key_ing['id'] == ing['id']:
+                    raise serializers.ValidationError(
+                                'Ингредиенты должны быть уникальны.')
             attrs['ingredients'].append(ing)
         return attrs
 
