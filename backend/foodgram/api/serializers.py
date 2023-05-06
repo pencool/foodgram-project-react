@@ -1,7 +1,6 @@
 import base64
 
 from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import (Cart, Favorite, Follow, Ingredient,
@@ -116,7 +115,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             for key_ing in attrs['ingredients']:
                 if key_ing['id'] == ing['id']:
                     raise serializers.ValidationError(
-                                'Ингредиенты должны быть уникальны.')
+                        'Ингредиенты должны быть уникальны.')
             attrs['ingredients'].append(ing)
         return attrs
 
