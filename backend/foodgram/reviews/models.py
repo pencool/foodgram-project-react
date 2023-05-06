@@ -57,8 +57,7 @@ class Recipe(models.Model):
 class IngredientsAmount(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    amount = models.PositiveIntegerField(default=1,
-                                         validators=[MinValueValidator(1)])
+    amount = models.PositiveIntegerField(validators=[MinValueValidator(1)])
 
     class Meta:
         constraints = [
