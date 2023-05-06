@@ -109,11 +109,11 @@ class RecipeSerializer(serializers.ModelSerializer):
                 'Нельзя добавлять рецепты без ингредиентов.')
         attrs['ingredients'] = []
         for ing in ingredients:
-            if ing['amount'] <= 0:
+            if int(ing['amount']) <= 0:
                 raise serializers.ValidationError(
                     'Количество ингредиента должно быть больше 0!')
             for key_ing in attrs['ingredients']:
-                if key_ing['id'] == ing['id']:
+                if int(key_ing['id']) == int(ing['id']):
                     raise serializers.ValidationError(
                         'Ингредиенты должны быть уникальны.')
             attrs['ingredients'].append(ing)
