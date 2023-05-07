@@ -12,7 +12,6 @@
 |http://pencoolfoodgram.ddns.net/api/docs/  | Документация |
 |http://pencoolfoodgram.ddns.net/admin/|Админ зона|
 
-Админка: admin@admin.ru | admin
 
 
 
